@@ -3,12 +3,18 @@ LABEL authors="robinson.nolasco"
 
 ENTRYPOINT ["top", "-b"]
 
-# @Docker Image: Usamos la versión de Java que tienes en tu proyecto
+# ETAPA 1: @Maven Build - Compilamos el código en la nube
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
+# Copiamos tu código al servidor de compilación
+COPY . .
+# Ejecutamos Maven para crear el archivo .jar (saltando los tests para ir más rápido)
+RUN mvn clean package -DskipTests
+
+# ETAPA 2: @Run - Ejecutamos la aplicación
 FROM eclipse-temurin:17-jdk-alpine
-
-# @Jar Copy: Copiamos el archivo generado por Maven al contenedor
-# Nota: Asegúrate que el nombre coincida con el que genera tu proyecto
-COPY target/*.jar app.jar
-
-# @Entrypoint: El comando que arranca tu Backend en el servidor
-ENTRYPOINT ["java","-jar","/app.jar"]
+WORKDIR /app
+# Traemos el archivo generado en la Etapa 1
+COPY --from=build /app/target/*.jar app.jar
+# Encendemos la aplicación
+ENTRYPOINT ["java","-jar","app.jar"]
