@@ -1,3 +1,8 @@
+FROM ubuntu:latest
+LABEL authors="robinson.nolasco"
+
+ENTRYPOINT ["top", "-b"]
+
 # @Docker Image: Usamos la versión de Java que tienes en tu proyecto
 FROM eclipse-temurin:17-jdk-alpine
 
